@@ -1,27 +1,46 @@
 pipeline {
+  
+  environment {
+    dockerimagename = "adamhome/secondtest"
+    dockerImage = ""
+  }
+
   agent any
+
   stages {
-    stage('clone') {
+
+    stage('Checkout Source') {
       steps {
-        git(url: 'https://github.com/flyd0g/flask-hello-world.git', branch: 'containerized')
+        git 'https://github.com/flyd0g/azure-jenkins-k8s-flask-hello-world.git'
       }
     }
 
-    stage('build') {
+    stage('Build Image') {
       steps {
-        sh 'docker build -t adamhome/secondtest:latest .'
-      }
-    }
-
-    stage('push') {
-      steps {
-        sh '''withCredentials([usernamePassword(credentialsId: \'dockerhub\', passwordVariable: \'dockerpassword\', usernameVariable: \'dockerusername\')]) {
-    sh \'\'\'docker login -u ${dockerusername}-p ${dockerpassword}
-docker push adamhome/secondtest:latest
-\'\'\'
-}'''
+        script {
+          dockerImage = docker.build dockerimagename
         }
       }
-
     }
+
+    stage('Push Image') {
+      environment {
+        registryCredential = 'dockerhub'
+      }
+      steps {
+        docker.withRegistry('https://registry.hub.docker.com', registryCredential) {
+          dockerImage.push("latest")
+        }
+      }
+    }
+    
+    stage('Deploy app to k8s') {
+      steps {
+        script {
+          KubernetesDeploy(configs: "flask_app.yaml", kubeconfigId: "kubernetes")
+        }
+      }
+    }
+
   }
+}
