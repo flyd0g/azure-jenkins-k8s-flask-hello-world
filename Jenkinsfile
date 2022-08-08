@@ -11,7 +11,7 @@ pipeline {
 
     stage('Checkout Source') {
       steps {
-        git 'https://github.com/flyd0g/azure-jenkins-k8s-flask-hello-world.git'
+        git branch: 'main', url: 'https://github.com/flyd0g/azure-jenkins-k8s-flask-hello-world.git'
       }
     }
 
