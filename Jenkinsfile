@@ -39,7 +39,7 @@ pipeline {
     stage('Deploy app to k8s') {
       steps {
         script {
-          kubernetesDeploy configs: 'flask_app.yaml', kubeConfig: [path: ''], kubeconfigId: 'kubernetes', secretName: '', ssh: [sshCredentialsId: '*', sshServer: ''], textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://']
+          kubernetesDeploy configs: 'flask_app.yaml', dockerCredentials: [[credentialsId: 'dockerhub']], kubeConfig: [path: ''], kubeconfigId: 'kubernetes', secretName: 'docker-hub', secretNamespace: 'kube-system', ssh: [sshCredentialsId: '*', sshServer: ''], textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://']
         }
       }
     }
